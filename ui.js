@@ -8,6 +8,7 @@ export const UI = {
     formApertura: document.getElementById('form-apertura'),
     saldoInicialInput: document.getElementById('saldo-inicial-input'),
     errorApertura: document.getElementById('error-apertura'),
+    btnEditarSaldo: document.getElementById('btn-editar-saldo'), // NUEVO SELECTOR
     
     displaySaldoInicial: document.getElementById('display-saldo-inicial'),
     displayTotalGastos: document.getElementById('display-total-gastos'),
@@ -21,34 +22,38 @@ export const UI = {
     btnImportar: document.getElementById('btn-importar'),
 
     /**
-     * Sanitizador explícito de cadenas de texto para contrarrestar ataques XSS (RT-04)
+     * Sanitizador de strings para mitigar vulnerabilidades XSS
      */
     sanitizar(stringCrudo) {
-        const temporal = document.createElement('div'); [cite: 33]
-        temporal.textContent = stringCrudo; [cite: 33]
+        const temporal = document.createElement('div');
+        temporal.textContent = stringCrudo;
         return temporal.innerHTML;
     },
 
     /**
-     * Control de visualización de la pantalla de bloqueo de control inicial (RF-01)
+     * Control de visualización del modal
      */
-    toggleModalApertura(mostrar) {
+    toggleModalApertura(mostrar, valorActual = null) {
         if (mostrar) {
             this.modal.classList.remove('hidden');
             this.modal.setAttribute('aria-hidden', 'false');
+            if (valorActual !== null) {
+                this.saldoInicialInput.value = valorActual; // Precarga el saldo para su modificación
+            }
         } else {
             this.modal.classList.add('hidden');
             this.modal.setAttribute('aria-hidden', 'true');
+            this.formApertura.reset();
         }
     },
 
     /**
-     * Renderizado dinámico general de los balances en el Dashboard (RF-03, RF-04)
+     * Renderizado dinámico de balances
      */
     renderizarDashboard(saldoInicial, totalGastos, saldoActual, activarAlerta) {
-        this.displaySaldoInicial.textContent = `$${saldoInicial.toFixed(2)}`; [cite: 33]
-        this.displayTotalGastos.textContent = `$${totalGastos.toFixed(2)}`; [cite: 33]
-        this.displaySaldoActual.textContent = `$${saldoActual.toFixed(2)}`; [cite: 33]
+        this.displaySaldoInicial.textContent = `$${saldoInicial.toFixed(2)}`;
+        this.displayTotalGastos.textContent = `$${totalGastos.toFixed(2)}`;
+        this.displaySaldoActual.textContent = `$${saldoActual.toFixed(2)}`;
 
         if (activarAlerta) {
             this.alertaCritica.classList.remove('hidden');
@@ -60,34 +65,28 @@ export const UI = {
     },
 
     /**
-     * Renderizado optimizado del Libro Diario usando DocumentFragment para evitar Reflow masivo (RT-04, RF-05)
+     * Renderizado optimizado mediante DocumentFragment
      */
     renderizarTransacciones(transacciones, callbackEliminar) {
-        // Limpiamos tabla de forma nativa y segura
-        this.listaTransacciones.textContent = ''; [cite: 33]
+        this.listaTransacciones.textContent = '';
 
         if (transacciones.length === 0) {
-            const filaVacia = document.createElement('tr'); [cite: 33]
+            const filaVacia = document.createElement('tr');
             filaVacia.innerHTML = `<td colspan="4" class="text-center" style="color: var(--text-secondary);">Ningún movimiento asentado en este período.</td>`;
             this.listaTransacciones.appendChild(filaVacia);
             return;
         }
 
-        const fragmento = document.createDocumentFragment(); [cite: 34]
-
-        // Cronológico inverso (RF-05)
+        const fragmento = document.createDocumentFragment();
         const transaccionesOrdenadas = [...transacciones].reverse();
 
         transaccionesOrdenadas.forEach(tx => {
-            const fila = document.createElement('tr'); [cite: 33]
-            
-            // Sanitización rigurosa de variables de entrada de usuario para prevenir XSS (RT-04)
+            const fila = document.createElement('tr');
             const descripcionSanitizada = tx.descripcion ? this.sanitizar(tx.descripcion) : `<small style="color:var(--text-secondary)">S/D</small>`;
             const categoriaSanitizada = this.sanitizar(tx.categoria);
             const montoClase = tx.tipo === 'ingreso' ? 'tx-ingreso' : 'tx-gasto';
             const signo = tx.tipo === 'ingreso' ? '+' : '-';
 
-            // Estructura interna de celdas
             fila.innerHTML = `
                 <td class="font-mono">${tx.fecha}</td>
                 <td>
@@ -100,7 +99,6 @@ export const UI = {
                 </td>
             `;
 
-            // Enlace seguro de escucha de eventos en el botón físico de remoción (RF-05)
             fila.querySelector('.btn-eliminar-tx').addEventListener('click', (e) => {
                 const idTx = e.target.getAttribute('data-id');
                 callbackEliminar(idTx);
@@ -112,9 +110,6 @@ export const UI = {
         this.listaTransacciones.appendChild(fragmento);
     },
 
-    /**
-     * Establece la fecha de hoy por defecto en el selector correspondiente (RF-02)
-     */
     establecerFechaPorDefecto() {
         const hoy = new Date();
         const dia = String(hoy.getDate()).padStart(2, '0');
