@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapitalFlow // Finanzas Personales Premium</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div id="modal-apertura" class="modal-overlay hidden" aria-hidden="true">
+        <div class="modal-content" role="dialog" aria-labelledby="modal-titulo">
+            <h2 id="modal-titulo">Apertura de Caja Mensual</h2>
+            <p>Para iniciar la gestión financiera del mes, introduzca el capital base líquido disponible.</p>
+            <form id="form-apertura" novalidate>
+                <div class="form-group">
+                    <label for="saldo-inicial-input">Saldo Inicial de Caja ($)</label>
+                    <input type="number" id="saldo-inicial-input" min="0" step="0.01" placeholder="0.00" required>
+                    <span class="error-msg hidden" id="error-apertura">El saldo debe ser un número mayor o igual a cero.</span>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Establecer Capital de Trabajo</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <header class="main-header">
+            <div class="logo">
+                <span class="currency-symbol">$</span> CapitalFlow
+            </div>
+            <nav class="nav-actions">
+                <button id="btn-exportar" class="btn btn-secondary btn-sm" aria-label="Exportar datos financieros en JSON">Exportar JSON</button>
+                <label for="btn-importar" class="btn btn-secondary btn-sm" style="cursor:pointer;">
+                    Importar JSON
+                    <input type="file" id="btn-importar" accept=".json" style="display:none;">
+                </label>
+            </nav>
+        </header>
+
+        <main class="dashboard-grid">
+            
+            <section class="cards-section" aria-label="Resumen de Estados Financieros">
+                <div class="card card-vault">
+                    <div class="card-title">Saldo Inicial de Caja</div>
+                    <div class="card-value" id="display-saldo-inicial">$0.00</div>
+                </div>
+                <div class="card card-expense">
+                    <div class="card-title">Total Gastos Acumulados</div>
+                    <div class="card-value" id="display-total-gastos">$0.00</div>
+                </div>
+                <div class="card card-net">
+                    <div class="card-title">Saldo Actual / Flujo de Caja</div>
+                    <div class="card-value" id="display-saldo-actual">$0.00</div>
+                    <div id="alerta-critica" class="alert-banner hidden">¡Alerta! Gastos superan el 80% del capital base.</div>
+                </div>
+            </section>
+
+            <section class="form-section" aria-labelledby="form-titulo">
+                <h3 id="form-titulo">Registrar Nuevo Movimiento</h3>
+                <form id="form-transaccion" autocomplete="off">
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label for="tx-tipo">Tipo de Flujo</label>
+                            <select id="tx-tipo" required>
+                                <option value="ingreso">🟢 Ingreso (+)</option>
+                                <option value="gasto" selected>🔴 Gasto (-)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tx-monto">Monto Líquido</label>
+                            <input type="number" id="tx-monto" min="0.01" step="0.01" placeholder="0.00" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label for="tx-categoria">Categoría Contable</label>
+                            <select id="tx-categoria" required>
+                                <option value="Vivienda">Vivienda</option>
+                                <option value="Alimentación">Alimentación</option>
+                                <option value="Transporte">Transporte</option>
+                                <option value="Ocio">Ocio</option>
+                                <option value="Sueldo">Sueldo</option>
+                                <option value="Otros">Otros</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tx-fecha">Fecha Contable</label>
+                            <input type="date" id="tx-fecha" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tx-descripcion">Descripción / Glosa (Opcional)</label>
+                        <input type="text" id="tx-descripcion" maxlength="50" placeholder="Ej. Depósito haberes, compra insumos...">
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-block">Asentar Transacción</button>
+                </form>
+            </section>
+
+            <section class="history-section" aria-labelledby="history-titulo">
+                <h3 id="history-titulo">Libro Diario de Transacciones</h3>
+                <div class="table-container">
+                    <table class="financial-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Descripción / Categoría</th>
+                                <th class="text-right">Monto</th>
+                                <th class="text-center">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-transacciones">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
